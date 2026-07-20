@@ -25,7 +25,6 @@ from src.data_collector import collect_all
 from src.data_cleaner import clean_and_merge
 from src.trend_analyzer import analyze
 from src.report_generator import generate_report
-from src.visualizer import generate_all_charts
 
 logging.disable(logging.CRITICAL)
 
@@ -69,7 +68,12 @@ def _load_pipeline(viz_library: str = "matplotlib"):
     raw_frames = collect_all(config)
     df = clean_and_merge(raw_frames)
     results = analyze(df, config)
-    generate_all_charts(df, results, config)
+
+    if os.getenv("ENABLE_CHARTS", "false").lower() in ("1", "true", "yes"):
+        from src.visualizer import generate_all_charts
+
+        generate_all_charts(df, results, config)
+
     report_md = generate_report(df, results, config)
     return df, results, report_md
 

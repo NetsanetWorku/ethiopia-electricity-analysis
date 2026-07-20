@@ -1,0 +1,13 @@
+.vscode/
+.idea/
+.pytest_cache/
+.hypothesis/
+tests/
+notebooks/
+*.ipynb
+requirements-dev.txt
+Dockerfile
+.dockerignore
+README.md
+DEPLOYMENT.md
+.github/

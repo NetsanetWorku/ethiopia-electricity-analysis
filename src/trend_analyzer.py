@@ -231,8 +231,8 @@ def fit_linear_trend(df: pd.DataFrame, column: str) -> dict | None:
     """
     Fit a linear regression to non-NaN rows of the specified column.
 
-    Uses ``scipy.stats.linregress`` with ``year`` as the independent variable
-    and *column* values as the dependent variable.
+    Uses NumPy to compute the ordinary least squares line with ``year`` as the
+    independent variable and *column* values as the dependent variable.
 
     Parameters
     ----------
@@ -249,13 +249,10 @@ def fit_linear_trend(df: pd.DataFrame, column: str) -> dict | None:
 
             {'slope': float, 'intercept': float, 'r_squared': float}
 
-        ``r_squared`` is the square of the Pearson correlation coefficient
-        (i.e. ``linregress.rvalue ** 2``).
-
         Returns ``None`` and logs a WARNING when fewer than 5 non-NaN rows
         are available.
     """
-    from scipy.stats import linregress
+    import numpy as np
 
     _STEP = "trend_analyzer.fit_linear_trend"
 
@@ -283,11 +280,24 @@ def fit_linear_trend(df: pd.DataFrame, column: str) -> dict | None:
     x = valid_df["year"].to_numpy(dtype=float)
     y = valid_df[column].to_numpy(dtype=float)
 
-    result = linregress(x, y)
+    x_mean = np.mean(x)
+    y_mean = np.mean(y)
+    x_diff = x - x_mean
+    y_diff = y - y_mean
 
-    slope = float(result.slope)
-    intercept = float(result.intercept)
-    r_squared = float(result.rvalue ** 2)
+    ss_xx = np.sum(x_diff * x_diff)
+    ss_xy = np.sum(x_diff * y_diff)
+    slope = float(ss_xy / ss_xx) if ss_xx != 0 else 0.0
+    intercept = float(y_mean - slope * x_mean)
+
+    y_pred = slope * x + intercept
+    ss_tot = np.sum(y_diff * y_diff)
+    ss_res = np.sum((y - y_pred) ** 2)
+
+    if ss_tot == 0:
+        r_squared = 1.0
+    else:
+        r_squared = float(1.0 - ss_res / ss_tot)
 
     logger.info(
         "[%s] '%s' — slope=%.6f, intercept=%.4f, r_squared=%.4f",

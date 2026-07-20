@@ -6,3 +6,7 @@ plotly==5.22.0
 requests==2.32.3
 fastapi==0.108.0
 uvicorn[standard]==0.23.2
+jupyter==1.0.0
+nbconvert==7.16.4
+hypothesis==6.100.0
+pytest==8.2.0
