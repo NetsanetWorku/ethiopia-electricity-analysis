@@ -50,6 +50,28 @@ If the API is unreachable, the pipeline falls back to these cached files automat
 
 ---
 
+## Running the API
+
+After installing dependencies, run the FastAPI application from the project root:
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8501
+```
+
+Then open:
+- http://localhost:8501 for the HTML landing page
+- http://localhost:8501/docs for the interactive OpenAPI docs
+- http://localhost:8501/api/summary for JSON summary results
+- http://localhost:8501/api/data for the cleaned dataset
+- http://localhost:8501/api/report for the generated Markdown report
+
+## Vercel deployment
+
+This repository includes a `vercel.json` file at the project root that routes all incoming requests to `app.py` and uses Vercel's Python runtime. After pushing to GitHub, deploy with the Vercel CLI:
+
+```bash
+vercel --prod
+```
+
 ## Running the Notebook
 
 Launch JupyterLab (or classic Jupyter Notebook) from the project root:
@@ -74,7 +96,6 @@ jupyter nbconvert --to notebook --execute \
     notebooks/ethiopia_electricity.ipynb \
     --output notebooks/ethiopia_electricity_executed.ipynb
 ```
-
 ---
 
 ## Running Tests

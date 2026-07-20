@@ -12,11 +12,11 @@ All data were obtained from the **World Bank Open Data** platform via the World 
 | Country | Ethiopia (country code: `ET`) |
 | Indicator 1 | Electric Power Consumption — `EG.USE.ELEC.KH.PC` |
 | Indicator 2 | Access to Electricity — `EG.ELC.ACCS.ZS` |
-| Access Date | 2026-07-13 |
+| Access Date | 2026-07-14 |
 
 **Full citation:**
 
-> World Bank (various years). *Electric power consumption (kWh per capita)* [EG.USE.ELEC.KH.PC] and *Access to electricity (% of population)* [EG.ELC.ACCS.ZS]. Washington, D.C.: World Bank. Retrieved 2026-07-13 from https://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC and https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS.
+> World Bank (various years). *Electric power consumption (kWh per capita)* [EG.USE.ELEC.KH.PC] and *Access to electricity (% of population)* [EG.ELC.ACCS.ZS]. Washington, D.C.: World Bank. Retrieved 2026-07-14 from https://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC and https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS.
 
 
 # Methodology
