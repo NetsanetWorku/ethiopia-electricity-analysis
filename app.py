@@ -26,7 +26,9 @@ from src.data_cleaner import clean_and_merge
 from src.trend_analyzer import analyze
 from src.report_generator import generate_report
 
-logging.disable(logging.CRITICAL)
+# Only disable logging for external libraries, keep our logs visible in production
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 app = FastAPI(
     title="Ethiopia Electricity Analysis",
@@ -51,6 +53,12 @@ app.mount(
 _pipeline_cache: dict[str, tuple[pd.DataFrame, dict, str]] = {}
 
 
+@app.get("/health")
+async def health_check():
+    """Lightweight health check endpoint for Vercel."""
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+
 def _build_config(viz_library: str) -> object:
     class _Cfg:
         COUNTRY_CODE = _config.COUNTRY_CODE
@@ -64,29 +72,42 @@ def _build_config(viz_library: str) -> object:
 
 
 def _load_pipeline(viz_library: str = "matplotlib"):
-    config = _build_config(viz_library)
-    raw_frames = collect_all(config)
-    df = clean_and_merge(raw_frames)
-    results = analyze(df, config)
+    try:
+        config = _build_config(viz_library)
+        raw_frames = collect_all(config)
+        df = clean_and_merge(raw_frames)
+        results = analyze(df, config)
 
-    if os.getenv("ENABLE_CHARTS", "false").lower() in ("1", "true", "yes"):
-        from src.visualizer import generate_all_charts
+        if os.getenv("ENABLE_CHARTS", "false").lower() in ("1", "true", "yes"):
+            from src.visualizer import generate_all_charts
 
-        generate_all_charts(df, results, config)
+            generate_all_charts(df, results, config)
 
-    report_md = generate_report(df, results, config)
-    return df, results, report_md
+        report_md = generate_report(df, results, config)
+        return df, results, report_md
+    except Exception as e:
+        logging.error(f"Error loading pipeline: {e}", exc_info=True)
+        raise
 
 
 def get_pipeline_data(refresh: bool = False, viz_library: str = "matplotlib"):
     if refresh or "data" not in _pipeline_cache:
-        _pipeline_cache["data"] = _load_pipeline(viz_library)
+        try:
+            _pipeline_cache["data"] = _load_pipeline(viz_library)
+        except Exception as e:
+            logging.error(f"Failed to load pipeline data: {e}")
+            # Return empty data structures to allow API to respond gracefully
+            return pd.DataFrame(), {}, ""
     return _pipeline_cache["data"]
 
 
 @app.on_event("startup")
 async def startup_event():
-    get_pipeline_data()
+    try:
+        get_pipeline_data()
+    except Exception as e:
+        logging.warning(f"Failed to pre-load data during startup: {e}. Data will be loaded on first request.")
+        pass
 
 
 def _format_metric(value: Optional[float]) -> str:
